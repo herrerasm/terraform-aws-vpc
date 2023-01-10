@@ -145,7 +145,9 @@ EOF
       "netmask",
       "name_prefix",
       "nat_gateway_configuration",
-      "tags"
+      "tags",
+      "assign_ipv6_address_on_creation",
+      "connect_to_eigw"
     ])) == 0
   }
 
@@ -181,8 +183,8 @@ EOF
   }
 
   validation {
-    error_message = "Each subnet type must contain only 1 key: `cidrs` or `netmask`."
-    condition     = alltrue([for subnet_type, v in var.subnets : length(setintersection(keys(v), ["cidrs", "netmask"])) == 1])
+    error_message = "Each subnet type must contain only 1 key: `cidrs` or `netmask` or `ipv_native`."
+    condition     = alltrue([for subnet_type, v in var.subnets : length(setintersection(keys(v), ["cidrs", "netmask", "ipv6_native"])) == 1])
   }
 
   validation {
@@ -282,4 +284,29 @@ variable "core_network_routes" {
 EOF
   type        = any
   default     = {}
+}
+
+# Variables used for IPv6
+variable "ipv6_cidr_block_type" {
+  description = "Whether or not to use IPv6 for the VPC and which type of CIDR the IPv6 will have. Options: \"IPAM-allocated IPv6 CIDR block\", \"Amazon-provided IPv6 CIDR block\", \"IPv6 CIDR owned by me\", \"No IPv6 CIDR block\". Variable overrides null value types for some keys, defined in defaults.tf. Probs file does not exist."
+  default     = "No IPv6 CIDR block"
+  type        = string
+
+
+  validation {
+    condition     = contains(["IPAM-allocated IPv6 CIDR block", "Amazon-provided IPv6 CIDR block", "IPv6 CIDR owned by me", "No IPv6 CIDR block"], var.ipv6_cidr_block_type)
+    error_message = "Invalid input, options: \"IPAM-allocated IPv6 CIDR block\", \"Amazon-provided IPv6 CIDR block\", \"IPv6 CIDR owned by me\", \"No IPv6 CIDR block\"."
+  }
+}
+
+variable "vpc_ipv6_cidr_block" {
+  description = "CIDR range to assign to VPC if creating VPC or to associte as a secondary CIDR. Overridden by var.vpc_id output from data.aws_vpc."
+  default     = null
+  type        = string
+}
+
+variable "vpc_egress_only_internet_gateway" {
+  description = "Set to use the egress only gateway for all traffic Ipv6 going to the Internet."
+  type        = bool
+  default     = false
 }
