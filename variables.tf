@@ -287,22 +287,28 @@ EOF
 }
 
 # Variables used for IPv6
-variable "ipv6_cidr_block_type" {
-  description = "Whether or not to use IPv6 for the VPC and which type of CIDR the IPv6 will have. Options: \"IPAM-allocated IPv6 CIDR block\", \"Amazon-provided IPv6 CIDR block\", \"IPv6 CIDR owned by me\", \"No IPv6 CIDR block\". Variable overrides null value types for some keys, defined in defaults.tf. Probs file does not exist."
-  default     = "No IPv6 CIDR block"
-  type        = string
-
-
-  validation {
-    condition     = contains(["IPAM-allocated IPv6 CIDR block", "Amazon-provided IPv6 CIDR block", "IPv6 CIDR owned by me", "No IPv6 CIDR block"], var.ipv6_cidr_block_type)
-    error_message = "Invalid input, options: \"IPAM-allocated IPv6 CIDR block\", \"Amazon-provided IPv6 CIDR block\", \"IPv6 CIDR owned by me\", \"No IPv6 CIDR block\"."
-  }
-}
-
 variable "vpc_ipv6_cidr_block" {
   description = "CIDR range to assign to VPC if creating VPC or to associte as a secondary CIDR. Overridden by var.vpc_id output from data.aws_vpc."
   default     = null
   type        = string
+}
+
+variable vpc_assign_generated_ipv6_cidr_block{
+  description = "Whether the vpc has ipv6 generated cider block"
+  type        = bool
+  default     = false
+}
+
+variable vpc_ipv6_ipam_pool_id{
+  description = "Set to use IPAM to get CIDR IPV6 block."
+  type        = string
+  default     = null
+}
+
+variable vpc_ipv6_netmask_length{
+  description = "Set to use IPAM to get CIDR block using a specified netmask. Must be set with var.vpc_ipv6_ipam_pool_id."
+  type        = string
+  default     = null
 }
 
 variable "vpc_egress_only_internet_gateway" {
